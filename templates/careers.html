@@ -646,7 +646,7 @@
 
         <label for="cv">Upload CV/Resume (Recommended):</label>
         <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx,.txt">
-        <p class="file-hint">Accepted formats: PDF, DOC, DOCX, TXT (Max 5MB)</p>
+        <p class="file-hint">Accepted formats: PDF, DOC, DOCX, TXT (Max 10MB)</p>
 
         <label for="coverLetter" class="required">Cover Letter:</label>
         <textarea id="coverLetter" name="coverLetter" rows="6" placeholder="Tell us why you're interested in this role, your relevant experience, and what you can bring to our team..." required></textarea>
@@ -749,9 +749,9 @@
         // Check file size if file is selected
         if (file.files[0]) {
           const fileSize = file.files[0].size / 1024 / 1024; // in MB
-          if (fileSize > 5) {
+          if (fileSize > 10) {
             e.preventDefault();
-            alert('File size exceeds 5MB. Please upload a smaller file.');
+            alert('File size exceeds 10MB. Please upload a smaller file.');
             return false;
           }
         }
