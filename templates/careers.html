@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NexusAI Solutions – Careers & Opportunities</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --primary: #0a2540;
+      --accent:  #0066ff;
+      --light:   #f8f9fc;
+      --gray:    #6b7280;
+      --dark:    #111827;
+      --success: #d1fae5;
+      --error:   #fee2e2;
+      --warning: #fef3c7;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--dark);
+      background: white;
+      line-height: 1.6;
+    }
+
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      z-index: 1000;
+    }
+
+    nav {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo i { color: var(--accent); }
+
+    .nav-menu {
+      display: flex;
+      gap: 1.8rem;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-menu a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-menu a:hover { color: var(--accent); }
+
+    .hamburger {
+      display: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: var(--primary);
+    }
+
+    main {
+      margin-top: 80px;
+      padding: 2rem 1.5rem;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    h1, h2 {
+      color: var(--primary);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-size: 2.2rem;
+      margin-bottom: 2rem;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 3rem 0 2rem;
+    }
+
+    .tab-btn {
+      padding: 0.8rem 1.8rem;
+      background: #eee;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      min-width: 150px;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+      background: #f9f9f9;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      margin-bottom: 3rem;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .job-desc {
+      margin: 1.5rem 0;
+    }
+
+    .job-desc h3 {
+      color: var(--accent);
+      margin: 1.5rem 0 0.5rem;
+      font-size: 1.3rem;
+    }
+
+    .job-desc ul {
+      padding-left: 1.5rem;
+      margin: 1rem 0;
+    }
+
+    .job-desc li {
+      margin-bottom: 0.5rem;
+      line-height: 1.8;
+    }
+
+    .job-meta {
+      background: var(--light);
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--accent);
+    }
+
+    .job-meta p {
+      margin: 0.5rem 0;
+    }
+
+    .flash-messages {
+      max-width: 700px;
+      margin: 1.5rem auto;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .flash-success {
+      background: var(--success);
+      color: #065f46;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .flash-error {
+      background: var(--error);
+      color: #991b1b;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .flash-warning {
+      background: var(--warning);
+      color: #92400e;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    form {
+      max-width: 700px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin: 1.5rem 0 0.4rem;
+      font-weight: 500;
+      color: var(--primary);
+    }
+
+    .required::after {
+      content: " *";
+      color: #ef4444;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+
+    input[type="file"] {
+      padding: 0.5rem;
+      border: 2px dashed #ddd;
+      background: #fafafa;
+    }
+
+    input[type="file"]:hover {
+      border-color: var(--accent);
+    }
+
+    .file-hint {
+      font-size: 0.9rem;
+      color: var(--gray);
+      margin-top: 0.3rem;
+    }
+
+    button[type="submit"] {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: all 0.3s;
+      display: block;
+      width: 100%;
+      font-size: 1.1rem;
+    }
+
+    button[type="submit"]:hover {
+      background: #0055dd;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,102,255,0.3);
+    }
+
+    footer {
+      background: #0a0f1a;
+      color: #c7d2fe;
+      padding: 3rem 1.5rem;
+      text-align: center;
+      margin-top: 4rem;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    @media (max-width: 850px) {
+      .hamburger {
+        display: block;
+      }
+      
+      .nav-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        flex-direction: column;
+        padding: 1.5rem;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        gap: 1.2rem;
+      }
+      
+      .nav-menu.active {
+        display: flex;
+      }
+      
+      .tabs {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      h1 {
+        font-size: 2.2rem;
+      }
+      
+      h2 {
+        font-size: 1.8rem;
+      }
+      
+      main {
+        margin-top: 70px;
+        padding: 1.5rem 1rem;
+      }
+      
+      .tab-btn {
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav>
+      <div class="logo"><i class="fas fa-brain"></i> NexusAI Solutions</div>
+      <ul class="nav-menu">
+        <li><a href="/">Home</a></li>
+        <li><a href="/careers">Careers</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <div class="hamburger"><i class="fas fa-bars"></i></div>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Careers at NexusAI Solutions</h1>
+    <p style="text-align:center; max-width:800px; margin:1rem auto 3rem; color:var(--gray);">
+      Join our growing team in Los Angeles, Nairobi & remote roles worldwide. We're building practical AI solutions for enterprises & global clients.
+    </p>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="tech">Tech Roles</button>
+      <button class="tab-btn" data-tab="data-ai">Data & AI</button>
+      <button class="tab-btn" data-tab="business">Business & Ops</button>
+      <button class="tab-btn" data-tab="remote">Remote & Global</button>
+    </div>
+
+    <!-- Tech Roles Tab -->
+    <div id="tech" class="tab-content active">
+      <h2>Technology & Development Roles</h2>
+      
+      <div class="job-desc">
+        <h3>Senior Full-Stack Developer</h3>
+        <p>Lead development of enterprise AI platforms using modern tech stack. Architect scalable solutions and mentor junior developers.</p>
+        <div class="job-meta">
+          <p><strong>Location:</strong> Los Angeles, CA (Hybrid)</p>
+          <p><strong>Salary:</strong> $120,000 - $180,000/year + equity</p>
+          <p><strong>Experience:</strong> 5+ years in full-stack development</p>
+        </div>
+        <h4>Requirements:</h4>
+        <ul>
+          <li>Expertise in React/Next.js, Node.js, Python</li>
+          <li>Experience with cloud platforms (AWS/Azure/GCP)</li>
+          <li>Database design (PostgreSQL, MongoDB)</li>
+          <li>API design and microservices architecture</li>
+          <li>CI/CD and DevOps practices</li>
+        </ul>
+      </div>
+
+      <div class="job-desc">
+        <h3>Junior Developer</h3>
+        <p>Assist in building & maintaining web apps, AI dashboards, automation scripts. Hybrid (LA or Nairobi office + remote days).</p>
+        <div class="job-meta">
+          <p><strong>Location:</strong> Los Angeles, CA or Nairobi, Kenya</p>
+          <p><strong>Salary:</strong> $65,000 - $85,000/year</p>
+          <p><strong>Experience:</strong> 0-2 years experience</p>
+        </div>
+        <h4>Requirements:</h4>
+        <ul>
+          <li>Degree/Diploma in Computer Science or self-taught with portfolio</li>
+          <li>Basic HTML/CSS/JS + one framework (React/Vue preferred)</li>
+          <li>Git basics & understanding of APIs</li>
+          <li>Python or JavaScript proficiency</li>
+        </ul>
+      </div>
+
+      <div class="job-desc">
+        <h3>DevOps Engineer</h3>
+        <p>Build and maintain cloud infrastructure for AI applications. Implement CI/CD pipelines and ensure system reliability.</p>
+        <div class="job-meta">
+          <p><strong>Location:</strong> Remote (US timezone preferred)</p>
+          <p><strong>Salary:</strong> $100,000 - $150,000/year</p>
+          <p><strong>Experience:</strong> 3+ years in DevOps</p>
+        </div>
+        <h4>Requirements:</h4>
+        <ul>
+          <li>Kubernetes, Docker, Terraform</li>
+          <li>AWS/Azure certification preferred</li>
+          <li>Monitoring tools (Prometheus, Grafana)</li>
+          <li>Security best practices</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Data & AI Tab -->
+    <div id="data-ai" class="tab-content">
+      <h2>Data Science & AI Roles</h2>
+      
+      <div class="job-desc">
+        <h3>AI/ML Engineer</h3>
+        <p>Design, implement, and deploy machine learning models for enterprise clients. Work on NLP, computer vision, and predictive analytics.</p>
+        <div class="job-meta">
+          <p><strong>Location:</strong> Los Angeles, CA</p>
+          <p><strong>Salary:</strong> $130,000 - $200,000/year + bonuses</p>
+          <p><strong>Experience:</strong> 3+ years in ML engineering</p>
+        </div>
+        <h4>Requirements:</h4>
+        <ul>
+          <li>Python, PyTorch/TensorFlow, scikit-learn</li>
+          <li>MLOps and model deployment experience</li>
+          <li>Experience with LLMs and generative AI</li>
+          <li>Data pipeline design</li>
+          <li>MS/PhD in CS, Math, Statistics or related field</li>
+        </ul>
+      </div>
+
+      <div class="job-desc">
+        <h3>Data Scientist</h3>
+        <p>Analyze complex datasets, build predictive models, and provide insights for business decisions.</p>
+        <div class="job-meta">
+          <p><strong>Location:</strong> Hybrid (LA/Nairobi)</p>
+          <p><strong>Salary:</strong> $90,000 - $140,000/year</p>
+          <p><strong>Experience:</strong> 2+ years in data science</p>
+        </div>
+        <h4>Requirements:</h4>
+        <ul>
+          <li>Statistical analysis and hypothesis testing</li>
+          <li>SQL, Python/R, data visualization</li>
+          <li>Experience with big data tools</li>
+          <li>Business intelligence and reporting</li>
+        </ul>
+      </div>
+
+      <div class="job-desc">
+        <h3>Data Entry & Annotation Specialist</h3>
+        <p>Entry-level position handling data labeling, cleaning, annotation for AI training datasets.</p>
+        <div class="job-meta">
+          <p><strong>Location:</strong> Nairobi, Kenya (Hybrid)</p>
+          <p><strong>Salary:</strong> $25,000 - $35,000/year</p>
+          <p><strong>Experience:</strong> 0-1 years</p>
+        </div>
+        <h4>Requirements:</h4>
+        <ul>
+          <li>Diploma/Certificate in IT, Business, or related</li>
+          <li>Strong attention to detail</li>
+          <li>Basic Excel/Google Sheets</li>
+          <li>Good English communication</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Business & Ops Tab -->
+    <div id="business" class="tab-content">
+      <h2>Business & Operations Roles</h2>
+      
+      <div class="job-desc">
+        <h3>AI Solutions Consultant</h3>
+        <p>Work with enterprise clients to identify AI opportunities, design solutions, and manage implementations.</p>
+        <div class="job-meta">
+          <p><strong>Location:</strong> Los Angeles, CA</p>
+          <p><strong>Salary:</strong> $110,000 - $160,000/year + commission</p>
+          <p><strong>Experience:</strong> 4+ years in tech consulting</p>
+        </div>
+        <h4>Requirements:</h4>
+        <ul>
+          <li>Enterprise software sales/consulting experience</li>
+          <li>Understanding of AI/ML technologies</li>
+          <li>Client relationship management</li>
+          <li>Business analysis and requirements gathering</li>
+          <li>MBA or relevant advanced degree preferred</li>
+        </ul>
+      </div>
+
+      <div class="job-desc">
+        <h3>Project Manager</h3>
+        <p>Manage AI implementation projects from initiation to delivery. Coordinate teams and ensure client satisfaction.</p>
+        <div class="job-meta">
+          <p><strong>Location:</strong> Hybrid (LA/Nairobi)</p>
+          <p><strong>Salary:</strong> $85,000 - $120,000/year</p>
+          <p><strong>Experience:</strong> 3+ years in tech project management</p>
+        </div>
+        <h4>Requirements:</h4>
+        <ul>
+          <li>PMP or Agile certification preferred</li>
+          <li>Experience with JIRA, Asana, or similar tools</li>
+          <li>Budget and timeline management</li>
+          <li>Risk management and mitigation</li>
+        </ul>
+      </div>
+
+      <div class="job-desc">
+        <h3>Marketing Specialist</h3>
+        <p>Develop and execute marketing strategies for AI solutions. Create content and manage digital campaigns.</p>
+        <div class="job-meta">
+          <p><strong>Location:</strong> Remote</p>
+          <p><strong>Salary:</strong> $60,000 - $85,000/year</p>
+          <p><strong>Experience:</strong> 2+ years in B2B marketing</p>
+        </div>
+        <h4>Requirements:</h4>
+        <ul>
+          <li>Content creation and copywriting</li>
+          <li>SEO/SEM and social media marketing</li>
+          <li>Marketing analytics tools</li>
+          <li>Understanding of tech/AI industry</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Remote & Global Tab -->
+    <div id="remote" class="tab-content">
+      <h2>Remote & Global Opportunities</h2>
+      
+      <div class="job-desc">
+        <h3>Remote Frontend Developer</h3>
+        <p>Build responsive, accessible user interfaces for AI applications. Work with React/Next.js and modern frontend tools.</p>
+        <div class="job-meta">
+          <p><strong>Location:</strong> Remote (Global)</p>
+          <p><strong>Salary:</strong> $70,000 - $110,000/year</p>
+          <p><strong>Experience:</strong> 2+ years in frontend development</p>
+        </div>
+        <h4>Requirements:</h4>
+        <ul>
+          <li>React/Next.js, TypeScript, TailwindCSS</li>
+          <li>Responsive design and accessibility</li>
+          <li>Testing frameworks (Jest, Cypress)</li>
+          <li>Available for core hours in US timezone</li>
+        </ul>
+      </div>
+
+      <div class="job-desc">
+        <h3>AI Content Writer</h3>
+        <p>Create technical and marketing content about AI solutions. Write blog posts, case studies, and documentation.</p>
+        <div class="job-meta">
+          <p><strong>Location:</strong> Remote (Global)</p>
+          <p><strong>Salary:</strong> $45,000 - $70,000/year</p>
+          <p><strong>Experience:</strong> 2+ years in technical writing</p>
+        </div>
+        <h4>Requirements:</h4>
+        <ul>
+          <li>Excellent writing and editing skills</li>
+          <li>Understanding of AI/ML concepts</li>
+          <li>SEO knowledge</li>
+          <li>Portfolio of published work</li>
+        </ul>
+      </div>
+
+      <div class="job-desc">
+        <h3>Customer Success Manager</h3>
+        <p>Ensure client satisfaction and adoption of AI solutions. Provide training and support to enterprise clients.</p>
+        <div class="job-meta">
+          <p><strong>Location:</strong> Remote (US/EU/Africa)</p>
+          <p><strong>Salary:</strong> $65,000 - $90,000/year</p>
+          <p><strong>Experience:</strong> 3+ years in customer success</p>
+        </div>
+        <h4>Requirements:</h4>
+        <ul>
+          <li>Experience with SaaS platforms</li>
+          <li>Training and onboarding expertise</li>
+          <li>Customer relationship management</li>
+          <li>Fluent in English (additional languages a plus)</li>
+        </ul>
+      </div>
+    </div>
+
+    <section id="apply">
+      <h2>Apply Now</h2>
+      <p style="text-align:center; color:var(--gray); max-width:700px; margin:0 auto 2rem;">
+        Submit your application for any position listed above. We typically respond within 3-5 business days.
+      </p>
+
+      <form id="jobForm" method="POST" action="{{ url_for('apply') }}" enctype="multipart/form-data">
+        <label for="position" class="required">Applying for:</label>
+        <select id="position" name="position" required>
+          <option value="">Select Position</option>
+          <optgroup label="Technology & Development">
+            <option value="Senior Full-Stack Developer">Senior Full-Stack Developer</option>
+            <option value="Junior Developer">Junior Developer</option>
+            <option value="DevOps Engineer">DevOps Engineer</option>
+          </optgroup>
+          <optgroup label="Data Science & AI">
+            <option value="AI/ML Engineer">AI/ML Engineer</option>
+            <option value="Data Scientist">Data Scientist</option>
+            <option value="Data Entry & Annotation Specialist">Data Entry Specialist</option>
+          </optgroup>
+          <optgroup label="Business & Operations">
+            <option value="AI Solutions Consultant">AI Solutions Consultant</option>
+            <option value="Project Manager">Project Manager</option>
+            <option value="Marketing Specialist">Marketing Specialist</option>
+          </optgroup>
+          <optgroup label="Remote & Global">
+            <option value="Remote Frontend Developer">Remote Frontend Developer</option>
+            <option value="AI Content Writer">AI Content Writer</option>
+            <option value="Customer Success Manager">Customer Success Manager</option>
+            <option value="Other Remote Role">Other Remote Role</option>
+          </optgroup>
+        </select>
+
+        <label for="fullName" class="required">Full Name:</label>
+        <input type="text" id="fullName" name="fullName" placeholder="John Doe" required>
+
+        <label for="email" class="required">Email:</label>
+        <input type="email" id="email" name="email" placeholder="john.doe@example.com" required>
+
+        <label for="phone" class="required">Phone Number:</label>
+        <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567" required>
+
+        <label for="location" class="required">Location (City, Country):</label>
+        <input type="text" id="location" name="location" placeholder="Los Angeles, USA" required>
+
+        <label for="experience" class="required">Years of Relevant Experience:</label>
+        <input type="number" id="experience" name="experience" min="0" max="50" placeholder="3" required>
+
+        <label for="cv">Upload CV/Resume (Recommended):</label>
+        <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx,.txt">
+        <p class="file-hint">Accepted formats: PDF, DOC, DOCX, TXT (Max 5MB)</p>
+
+        <label for="coverLetter" class="required">Cover Letter:</label>
+        <textarea id="coverLetter" name="coverLetter" rows="6" placeholder="Tell us why you're interested in this role, your relevant experience, and what you can bring to our team..." required></textarea>
+
+        <button type="submit">
+          <i class="fas fa-paper-plane"></i> Submit Application
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <footer id="contact">
+    <div style="max-width: 800px; margin: 0 auto;">
+      <p>© 2026 NexusAI Solutions Ltd. | <strong>123 Main Street, Los Angeles, CA 90012</strong></p>
+      <p>Contact: careers@nexusai.co | +1 (310) 555-1234 (US) | +254 700 123 456 (Kenya)</p>
+      <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a> | <a href="#">Cookie Policy</a></p>
+    </div>
+  </footer>
+
+  <script>
+    // Hamburger menu
+    const hamburger = document.querySelector('.hamburger');
+    const navMenu = document.querySelector('.nav-menu');
+    
+    hamburger.addEventListener('click', () => {
+      navMenu.classList.toggle('active');
+      hamburger.innerHTML = navMenu.classList.contains('active') 
+        ? '<i class="fas fa-times"></i>' 
+        : '<i class="fas fa-bars"></i>';
+    });
+
+    // Tabs functionality
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Remove active class from all buttons and contents
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        
+        // Add active class to clicked button and corresponding content
+        btn.classList.add('active');
+        const tabId = btn.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const target = document.querySelector(targetId);
+        if (target) {
+          window.scrollTo({
+            top: target.offsetTop - 100,
+            behavior: 'smooth'
+          });
+          
+          // Close mobile menu if open
+          if (navMenu.classList.contains('active')) {
+            navMenu.classList.remove('active');
+            hamburger.innerHTML = '<i class="fas fa-bars"></i>';
+          }
+        }
+      });
+    });
+
+    // File input styling
+    const fileInput = document.getElementById('cv');
+    if (fileInput) {
+      fileInput.addEventListener('change', function() {
+        if (this.files[0]) {
+          const fileName = this.files[0].name;
+          const label = this.previousElementSibling;
+          label.innerHTML = `Upload CV/Resume: <strong>${fileName}</strong>`;
+        }
+      });
+    }
+
+    // Form validation enhancement
+    const form = document.getElementById('jobForm');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        const position = document.getElementById('position');
+        const file = document.getElementById('cv');
+        
+        // Check if position is selected
+        if (position.value === '') {
+          e.preventDefault();
+          alert('Please select a position to apply for.');
+          position.focus();
+          return false;
+        }
+        
+        // Check file size if file is selected
+        if (file.files[0]) {
+          const fileSize = file.files[0].size / 1024 / 1024; // in MB
+          if (fileSize > 5) {
+            e.preventDefault();
+            alert('File size exceeds 5MB. Please upload a smaller file.');
+            return false;
+          }
+        }
+        
+        // If all validations pass, show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        submitBtn.disabled = true;
+      });
+    }
+  </script>
+</body>
+</html>
