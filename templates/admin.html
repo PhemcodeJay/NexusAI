@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NexusAI – Applications (Admin)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin:2rem; line-height:1.6; }
+    table { border-collapse:collapse; width:100%; }
+    th, td { border:1px solid #ddd; padding:0.8rem; text-align:left; }
+    th { background:#0a2540; color:white; }
+    tr:nth-child(even) { background:#f9f9f9; }
+    .cv-yes { color:#2f855a; font-weight:bold; }
+    .warning { color:#c53030; font-weight:bold; }
+  </style>
+</head>
+<body>
+  <h1>Job Applications ({{ applications|length }} total)</h1>
+  <p><strong>Warning:</strong> This page should be protected with authentication in production.</p>
+
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Position</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Location</th>
+      <th>Exp (yrs)</th>
+      <th>CV</th>
+      <th>Consent</th>
+      <th>Submitted</th>
+    </tr>
+    {% for row in applications %}
+    <tr>
+      <td>{{ row[0] }}</td>
+      <td>{{ row[1] }}</td>
+      <td>{{ row[2] }}</td>
+      <td><a href="mailto:{{ row[3] }}">{{ row[3] }}</a></td>
+      <td>{{ row[4] }}</td>
+      <td>{{ row[5] }}</td>
+      <td>{{ row[6] }}</td>
+      <td class="{% if row[8] %}cv-yes{% endif %}">
+        {% if row[8] %}Yes ({{ row[8] }}){% else %}—{% endif %}
+      </td>
+      <td>{% if row[9] == 1 %}Yes{% else %}<span class="warning">No</span>{% endif %}</td>
+      <td>{{ row[10] }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <p style="margin-top:2rem;">
+    <a href="/">← Back to Home</a> | 
+    <a href="/careers">View Careers Page</a>
+  </p>
+</body>
+</html>

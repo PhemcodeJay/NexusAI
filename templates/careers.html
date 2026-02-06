@@ -599,57 +599,54 @@
     <section id="apply">
       <h2>Apply Now</h2>
       <p style="text-align:center; color:var(--gray); max-width:700px; margin:0 auto 2rem;">
-        Submit your application for any position listed above. We typically respond within 3-5 business days.
+        Submit your application for any position listed above. We typically respond within 3–5 business days.
       </p>
 
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-messages" style="max-width:700px; margin:1.5rem auto;">
+            {% for category, message in messages %}
+              <div class="flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
       <form id="jobForm" method="POST" action="{{ url_for('apply') }}" enctype="multipart/form-data">
-        <label for="position" class="required">Applying for:</label>
-        <select id="position" name="position" required>
-          <option value="">Select Position</option>
-          <optgroup label="Technology & Development">
-            <option value="Senior Full-Stack Developer">Senior Full-Stack Developer</option>
-            <option value="Junior Developer">Junior Developer</option>
-            <option value="DevOps Engineer">DevOps Engineer</option>
-          </optgroup>
-          <optgroup label="Data Science & AI">
-            <option value="AI/ML Engineer">AI/ML Engineer</option>
-            <option value="Data Scientist">Data Scientist</option>
-            <option value="Data Entry & Annotation Specialist">Data Entry Specialist</option>
-          </optgroup>
-          <optgroup label="Business & Operations">
-            <option value="AI Solutions Consultant">AI Solutions Consultant</option>
-            <option value="Project Manager">Project Manager</option>
-            <option value="Marketing Specialist">Marketing Specialist</option>
-          </optgroup>
-          <optgroup label="Remote & Global">
-            <option value="Remote Frontend Developer">Remote Frontend Developer</option>
-            <option value="AI Content Writer">AI Content Writer</option>
-            <option value="Customer Success Manager">Customer Success Manager</option>
-            <option value="Other Remote Role">Other Remote Role</option>
-          </optgroup>
-        </select>
+        {{ form.csrf_token }}
 
-        <label for="fullName" class="required">Full Name:</label>
-        <input type="text" id="fullName" name="fullName" placeholder="John Doe" required>
+        <label for="{{ form.position.id }}" class="required">Applying for:</label>
+        {{ form.position(class="") }}
 
-        <label for="email" class="required">Email:</label>
-        <input type="email" id="email" name="email" placeholder="john.doe@example.com" required>
+        <label for="{{ form.full_name.id }}" class="required">Full Name:</label>
+        {{ form.full_name(placeholder="John Doe") }}
 
-        <label for="phone" class="required">Phone Number:</label>
-        <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567" required>
+        <label for="{{ form.email.id }}" class="required">Email:</label>
+        {{ form.email(placeholder="john.doe@example.com") }}
 
-        <label for="location" class="required">Location (City, Country):</label>
-        <input type="text" id="location" name="location" placeholder="Los Angeles, USA" required>
+        <label for="{{ form.phone.id }}" class="required">Phone Number:</label>
+        {{ form.phone(placeholder="+254 700 123 456") }}
 
-        <label for="experience" class="required">Years of Relevant Experience:</label>
-        <input type="number" id="experience" name="experience" min="0" max="50" placeholder="3" required>
+        <label for="{{ form.location.id }}" class="required">Location (City, Country):</label>
+        {{ form.location(placeholder="Nairobi, Kenya") }}
 
-        <label for="cv">Upload CV/Resume (Recommended):</label>
-        <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx,.txt">
-        <p class="file-hint">Accepted formats: PDF, DOC, DOCX, TXT (Max 10MB)</p>
+        <label for="{{ form.experience.id }}" class="required">Years of Relevant Experience:</label>
+        {{ form.experience(min="0", max="50", placeholder="3") }}
 
-        <label for="coverLetter" class="required">Cover Letter:</label>
-        <textarea id="coverLetter" name="coverLetter" rows="6" placeholder="Tell us why you're interested in this role, your relevant experience, and what you can bring to our team..." required></textarea>
+        <label for="{{ form.cv.id }}">Upload CV/Resume (PDF, DOC, DOCX – max 8 MB):</label>
+        {{ form.cv() }}
+        <p class="file-hint">Accepted formats: PDF, DOC, DOCX (Max 8MB)</p>
+
+        <label for="{{ form.cover_letter.id }}" class="required">Cover Letter:</label>
+        {{ form.cover_letter(rows="6", placeholder="Tell us why you're a great fit...") }}
+
+        <div style="margin:1.5rem 0; padding:1rem; background:#f8f9fc; border-radius:8px;">
+          <label>
+            {{ form.consent(type="checkbox", value="on") }}
+            I consent to the processing of my personal data for recruitment purposes
+            (see our <a href="#">Privacy Policy</a>)
+          </label>
+        </div>
 
         <button type="submit">
           <i class="fas fa-paper-plane"></i> Submit Application

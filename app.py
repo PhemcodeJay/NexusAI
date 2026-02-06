@@ -1,26 +1,75 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-import sqlite3
-from datetime import datetime
 import os
 import uuid
+import logging
+from datetime import datetime
+from pathlib import Path
+
+from flask import Flask, render_template, request, redirect, url_for, flash, abort
+from flask_wtf import FlaskForm
+from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from werkzeug.utils import secure_filename
+import magic  # pip install python-magic-bin  (Windows) or python-magic (Linux/macOS)
+
+from wtforms import StringField, TextAreaField, SelectField, IntegerField, FileField
+from wtforms.validators import DataRequired, Email, NumberRange, Optional, Length
+
+# ────────────────────────────────────────────────
+# CONFIG
+# ────────────────────────────────────────────────
 
 app = Flask(__name__)
-app.secret_key = "super-secret-change-me-in-production-2026"
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max file size
-app.config['UPLOAD_FOLDER'] = 'uploads'
 
-# Ensure uploads directory exists
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+# NEVER hard-code secrets in production
+app.secret_key = os.environ.get("SECRET_KEY") or "dev-fallback-do-not-use-in-prod-2026"
 
-# Database file
+# Folder & limits
+BASE_DIR = Path(__file__).resolve().parent
+UPLOAD_FOLDER = BASE_DIR / "uploads"
+UPLOAD_FOLDER.mkdir(exist_ok=True)
+app.config["UPLOAD_FOLDER"] = str(UPLOAD_FOLDER)
+app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8MB
+
+ALLOWED_EXTENSIONS = {"pdf", "doc", "docx"}
+ALLOWED_MIMETYPES = {
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+}
+
 DB_FILE = "nexusai_jobs.db"
 
+# Logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("app.log", encoding="utf-8"),
+    ],
+)
+logger = logging.getLogger(__name__)
+
+# Rate limiting (protects against spam submissions)
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["60 per hour"],
+    storage_uri="memory://",
+)
+
+# CSRF
+csrf = CSRFProtect(app)
+
 def init_db():
-    """Create the SQLite database and table if they don't exist"""
     if not os.path.exists(DB_FILE):
+        import sqlite3
         conn = sqlite3.connect(DB_FILE)
         c = conn.cursor()
-        c.execute('''
+        c.execute("PRAGMA journal_mode=WAL;")  # better concurrency
+        c.execute(
+            """
             CREATE TABLE applications (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 position TEXT NOT NULL,
@@ -31,187 +80,149 @@ def init_db():
                 experience_years INTEGER NOT NULL,
                 cover_letter TEXT,
                 cv_filename TEXT,
+                consent_given INTEGER NOT NULL DEFAULT 0,
                 submitted_at TEXT NOT NULL
             )
-        ''')
+            """
+        )
         conn.commit()
         conn.close()
-        print("Database and table created.")
+        logger.info("Database and applications table created.")
 
-# Initialize DB on startup
 init_db()
 
-# Allowed file extensions
-ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'txt'}
+# ────────────────────────────────────────────────
+# FORMS
+# ────────────────────────────────────────────────
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+class ApplicationForm(FlaskForm):
+    position = SelectField(
+        "Position", validators=[DataRequired(message="Please select a position")]
+    )
+    full_name = StringField("Full Name", validators=[DataRequired(), Length(max=120)])
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    phone = StringField("Phone Number", validators=[DataRequired(), Length(max=30)])
+    location = StringField("Location (City, Country)", validators=[DataRequired(), Length(max=100)])
+    experience = IntegerField(
+        "Years of Relevant Experience",
+        validators=[DataRequired(), NumberRange(min=0, max=60)],
+    )
+    cover_letter = TextAreaField(
+        "Cover Letter", validators=[DataRequired(), Length(max=4000)]
+    )
+    cv = FileField("CV/Resume", validators=[Optional()])
+    consent = StringField(  # We'll check it's "on"
+        "I consent to data processing", validators=[DataRequired()]
+    )
 
-@app.route('/')
+    def validate_cv(self, field):
+        if field.data and field.data.filename:
+            filename = field.data.filename
+            if "." not in filename or filename.rsplit(".", 1)[1].lower() not in ALLOWED_EXTENSIONS:
+                raise ValueError("Only PDF, DOC, DOCX allowed")
+
+            # Real content-type check
+            mime = magic.Magic(mime=True)
+            content = field.data.read(1024)
+            field.data.seek(0)
+            detected = mime.from_buffer(content)
+            if detected not in ALLOWED_MIMETYPES:
+                raise ValueError("Invalid file content – only PDF/Word documents allowed")
+
+# ────────────────────────────────────────────────
+# ROUTES
+# ────────────────────────────────────────────────
+
+@app.route("/")
 def home():
-    """Render the home page"""
-    return render_template('index.html')
+    return render_template("index.html")
 
-@app.route('/careers')
+@app.route("/careers")
 def careers():
-    """Render the careers page"""
-    return render_template('careers.html')
+    form = ApplicationForm()
+    # Populate positions dynamically if you want – for now static
+    form.position.choices = [
+        ("", "Select Position"),
+        # You can keep the same groups as in HTML or load from config later
+        ("Senior Full-Stack Developer", "Senior Full-Stack Developer"),
+        ("Junior Developer", "Junior Developer"),
+        # ... add others
+    ]
+    return render_template("careers.html", form=form)
 
-@app.route('/apply', methods=['POST'])
+@app.route("/apply", methods=["POST"])
+@limiter.limit("6 per hour")  # anti-spam
 def apply():
-    """Handle job application submissions with CV upload"""
+    form = ApplicationForm()
+
+    if not form.validate_on_submit():
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"{field}: {error}", "error")
+        return redirect(url_for("careers") + "#apply")
+
+    # File handling
+    cv_filename = None
+    cv_file = form.cv.data
+    if cv_file and cv_file.filename:
+        ext = cv_file.filename.rsplit(".", 1)[1].lower()
+        cv_filename = f"{uuid.uuid4().hex}.{ext}"
+        save_path = os.path.join(app.config["UPLOAD_FOLDER"], cv_filename)
+        cv_file.save(save_path)
+        logger.info(f"CV uploaded: {cv_filename}")
+
     try:
-        position = request.form.get('position', '').strip()
-        full_name = request.form.get('fullName', '').strip()
-        email = request.form.get('email', '').strip()
-        phone = request.form.get('phone', '').strip()
-        location = request.form.get('location', '').strip()
-        experience = request.form.get('experience', '0').strip()
-        cover_letter = request.form.get('coverLetter', '').strip()
-        
-        # File upload handling
-        cv_filename = None
-        if 'cv' in request.files:
-            cv_file = request.files['cv']
-            if cv_file and cv_file.filename != '':
-                if allowed_file(cv_file.filename):
-                    # Generate unique filename
-                    original_filename = cv_file.filename
-                    file_ext = original_filename.rsplit('.', 1)[1].lower()
-                    unique_filename = f"{uuid.uuid4().hex}.{file_ext}"
-                    cv_filename = unique_filename
-                    
-                    # Save file
-                    cv_file.save(os.path.join(app.config['UPLOAD_FOLDER'], cv_filename))
-                else:
-                    flash("Invalid file type. Please upload PDF, DOC, DOCX, or TXT files only.", "error")
-                    return redirect(url_for('careers') + "#apply")
-
-        # Basic validation
-        errors = []
-        if not position:
-            errors.append("Please select a position.")
-        if not full_name:
-            errors.append("Full name is required.")
-        if not email or "@" not in email:
-            errors.append("Valid email is required.")
-        if not phone:
-            errors.append("Phone number is required.")
-        if not location:
-            errors.append("Location is required.")
-        
-        try:
-            exp_years = int(experience)
-            if exp_years < 0:
-                errors.append("Experience cannot be negative.")
-        except ValueError:
-            errors.append("Experience must be a number.")
-            
-        # CV is optional but recommended
-        if not cv_filename:
-            flash("Note: No CV uploaded. Please consider attaching your CV for better consideration.", "warning")
-
-        if errors:
-            for msg in errors:
-                flash(msg, "error")
-            return redirect(url_for('careers') + "#apply")
-
-        # Save to SQLite
+        import sqlite3
         conn = sqlite3.connect(DB_FILE)
         c = conn.cursor()
-        c.execute('''
-            INSERT INTO applications 
-            (position, full_name, email, phone, location, experience_years, cover_letter, cv_filename, submitted_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            position,
-            full_name,
-            email,
-            phone,
-            location,
-            exp_years,
-            cover_letter,
-            cv_filename,
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        ))
+        c.execute(
+            """
+            INSERT INTO applications
+            (position, full_name, email, phone, location, experience_years,
+             cover_letter, cv_filename, consent_given, submitted_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                form.position.data,
+                form.full_name.data.strip(),
+                form.email.data.strip(),
+                form.phone.data.strip(),
+                form.location.data.strip(),
+                form.experience.data,
+                form.cover_letter.data.strip(),
+                cv_filename,
+                1 if form.consent.data == "on" else 0,
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            ),
+        )
         conn.commit()
         conn.close()
 
-        flash("Application submitted successfully! We will contact you soon.", "success")
-        return redirect(url_for('careers') + "#apply")
+        flash("Application submitted successfully! We'll be in touch soon.", "success")
+        logger.info(f"New application: {form.position.data} – {form.email.data}")
 
     except Exception as e:
-        flash(f"Error submitting application: {str(e)}", "error")
-        return redirect(url_for('careers') + "#apply")
+        logger.exception("Application submission failed")
+        flash("Sorry, something went wrong. Please try again later.", "error")
 
-@app.route('/admin/applications')
+    return redirect(url_for("careers") + "#apply")
+
+# Keep admin simple for now – PROTECT THIS PROPERLY LATER
+@app.route("/admin/applications")
 def view_applications():
-    """Admin view of applications - PROTECT THIS IN PRODUCTION!"""
+    # TODO: add real authentication (Flask-Login, basic auth, API key, etc.)
+    # For now – at least log access
+    logger.warning(f"Admin applications viewed from IP: {request.remote_addr}")
+
+    import sqlite3
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute("SELECT * FROM applications ORDER BY submitted_at DESC")
     rows = c.fetchall()
     conn.close()
 
-    # Create a simple HTML table for admin view
-    html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>NexusAI - Job Applications</title>
-        <style>
-            body { font-family: Arial, sans-serif; margin: 40px; }
-            table { border-collapse: collapse; width: 100%; }
-            th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-            th { background-color: #0a2540; color: white; }
-            tr:nth-child(even) { background-color: #f2f2f2; }
-            .has-cv { color: green; font-weight: bold; }
-            .no-cv { color: gray; }
-        </style>
-    </head>
-    <body>
-        <h1>Job Applications</h1>
-        <table>
-            <tr>
-                <th>ID</th>
-                <th>Position</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Location</th>
-                <th>Experience</th>
-                <th>CV</th>
-                <th>Submitted</th>
-            </tr>
-    """
-    
-    for row in rows:
-        has_cv = "Yes" if row[8] else "No"
-        cv_class = "has-cv" if row[8] else "no-cv"
-        html += f"""
-            <tr>
-                <td>{row[0]}</td>
-                <td>{row[1]}</td>
-                <td>{row[2]}</td>
-                <td><a href="mailto:{row[3]}">{row[3]}</a></td>
-                <td>{row[4]}</td>
-                <td>{row[5]}</td>
-                <td>{row[6]} years</td>
-                <td class="{cv_class}">{has_cv}</td>
-                <td>{row[9]}</td>
-            </tr>
-        """
-    
-    html += """
-        </table>
-        <p><a href="/">Back to Home</a></p>
-        <p><strong>Total Applications:</strong> """ + str(len(rows)) + """</p>
-    </body>
-    </html>
-    """
-    
-    return html
+    return render_template("admin.html", applications=rows)
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+if __name__ == "__main__":
+    # Development only
+    app.run(debug=True, host="0.0.0.0", port=5001)
