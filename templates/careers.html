@@ -616,42 +616,42 @@
         {{ form.csrf_token }}
 
         <label for="{{ form.position.id }}" class="required">Applying for:</label>
-        {{ form.position(class="") }}
+        {{ form.position(class="form-control", id="position") }}
 
         <label for="{{ form.full_name.id }}" class="required">Full Name:</label>
-        {{ form.full_name(placeholder="John Doe") }}
+        {{ form.full_name(class="form-control", placeholder="John Doe") }}
 
         <label for="{{ form.email.id }}" class="required">Email:</label>
-        {{ form.email(placeholder="john.doe@example.com") }}
+        {{ form.email(class="form-control", placeholder="john.doe@example.com") }}
 
         <label for="{{ form.phone.id }}" class="required">Phone Number:</label>
-        {{ form.phone(placeholder="+254 700 123 456") }}
+        {{ form.phone(class="form-control", placeholder="+254 700 123 456") }}
 
         <label for="{{ form.location.id }}" class="required">Location (City, Country):</label>
-        {{ form.location(placeholder="Nairobi, Kenya") }}
+        {{ form.location(class="form-control", placeholder="Nairobi, Kenya") }}
 
         <label for="{{ form.experience.id }}" class="required">Years of Relevant Experience:</label>
-        {{ form.experience(min="0", max="50", placeholder="3") }}
+        {{ form.experience(class="form-control", min="0", max="50", placeholder="3") }}
 
         <label for="{{ form.cv.id }}">Upload CV/Resume (PDF, DOC, DOCX – max 8 MB):</label>
-        {{ form.cv() }}
+        {{ form.cv(class="form-control", id="cv", accept=".pdf,.doc,.docx") }}
         <p class="file-hint">Accepted formats: PDF, DOC, DOCX (Max 8MB)</p>
 
         <label for="{{ form.cover_letter.id }}" class="required">Cover Letter:</label>
-        {{ form.cover_letter(rows="6", placeholder="Tell us why you're a great fit...") }}
+        {{ form.cover_letter(class="form-control", rows="6", placeholder="Tell us why you're a great fit...") }}
 
         <div style="margin:1.5rem 0; padding:1rem; background:#f8f9fc; border-radius:8px;">
-          <label>
-            {{ form.consent(type="checkbox", value="on") }}
-            I consent to the processing of my personal data for recruitment purposes
-            (see our <a href="#">Privacy Policy</a>)
-          </label>
+            <label>
+                {{ form.consent() }}
+                I consent to the processing of my personal data for recruitment purposes
+                (see our <a href="#">Privacy Policy</a>)
+            </label>
         </div>
 
         <button type="submit">
-          <i class="fas fa-paper-plane"></i> Submit Application
+            <i class="fas fa-paper-plane"></i> Submit Application
         </button>
-      </form>
+    </form>
     </section>
   </main>
 

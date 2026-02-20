@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Details - NexusAI Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #333;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin-left: 1rem;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        .application-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .section h2 {
+            color: #444;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .cover-letter {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.35rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-new { background: #e3f2fd; color: #1976d2; }
+        .status-reviewed { background: #fff3e0; color: #f57c00; }
+        .status-interviewing { background: #e8f5e8; color: #388e3c; }
+        .status-rejected { background: #ffebee; color: #d32f2f; }
+        .status-hired { background: #e8eaf6; color: #3f51b5; }
+
+        .meta-info {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .status-form {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        select {
+            padding: 0.6rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Application Details</h1>
+            <div class="nav-links">
+                <a href="{{ url_for('view_applications') }}">← Back to Applications</a>
+                <a href="{{ url_for('admin_logout') }}">Logout</a>
+            </div>
+        </div>
+
+        <div class="application-card">
+            <div class="section">
+                <h2>Application Status</h2>
+                <form class="status-form" method="POST" action="{{ url_for('update_application_status', app_id=application['id']) }}">
+                    <select name="status">
+                        <option value="new" {% if application['status'] == 'new' %}selected{% endif %}>New</option>
+                        <option value="reviewed" {% if application['status'] == 'reviewed' %}selected{% endif %}>Reviewed</option>
+                        <option value="interviewing" {% if application['status'] == 'interviewing' %}selected{% endif %}>Interviewing</option>
+                        <option value="rejected" {% if application['status'] == 'rejected' %}selected{% endif %}>Rejected</option>
+                        <option value="hired" {% if application['status'] == 'hired' %}selected{% endif %}>Hired</option>
+                    </select>
+                    <button type="submit" class="btn">Update Status</button>
+                </form>
+            </div>
+
+            <div class="section">
+                <h2>Personal Information</h2>
+                <div class="info-grid">
+                    <div>
+                        <div class="info-label">Full Name</div>
+                        <div class="info-value">{{ application['full_name'] }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Email</div>
+                        <div class="info-value"><a href="mailto:{{ application['email'] }}">{{ application['email'] }}</a></div>
+                    </div>
+                    <div>
+                        <div class="info-label">Phone</div>
+                        <div class="info-value"><a href="tel:{{ application['phone'] }}">{{ application['phone'] }}</a></div>
+                    </div>
+                    <div>
+                        <div class="info-label">Location</div>
+                        <div class="info-value">{{ application['location'] }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Job Details</h2>
+                <div class="info-grid">
+                    <div>
+                        <div class="info-label">Position Applied</div>
+                        <div class="info-value">{{ application['position'] }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Experience</div>
+                        <div class="info-value">{{ application['experience_years'] }} years</div>
+                    </div>
+                    <div>
+                        <div class="info-label">CV/Resume</div>
+                        <div class="info-value">
+                            {% if application['cv_filename'] %}
+                                <a href="{{ url_for('download_cv', filename=application['cv_filename']) }}" class="btn btn-secondary">Download CV</a>
+                            {% else %}
+                                No CV uploaded
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Cover Letter</h2>
+                <div class="cover-letter">{{ application['cover_letter'] }}</div>
+            </div>
+
+            <div class="section">
+                <h2>Additional Information</h2>
+                <div class="meta-info">
+                    <p><strong>Application ID:</strong> {{ application['id'] }}</p>
+                    <p><strong>Submitted:</strong> {{ application['submitted_at'] }}</p>
+                    <p><strong>Consent Given:</strong> {% if application['consent_given'] %}Yes{% else %}No{% endif %}</p>
+                    {% if application['ip_address'] %}
+                        <p><strong>IP Address:</strong> {{ application['ip_address'] }}</p>
+                    {% endif %}
+                    {% if application['user_agent'] %}
+                        <p><strong>User Agent:</strong> {{ application['user_agent'] }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,56 +1,572 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>NexusAI – Applications (Admin)</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin:2rem; line-height:1.6; }
-    table { border-collapse:collapse; width:100%; }
-    th, td { border:1px solid #ddd; padding:0.8rem; text-align:left; }
-    th { background:#0a2540; color:white; }
-    tr:nth-child(even) { background:#f9f9f9; }
-    .cv-yes { color:#2f855a; font-weight:bold; }
-    .warning { color:#c53030; font-weight:bold; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - NexusAI Applications</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .nav-brand i {
+            color: #667eea;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .flash-messages {
+            margin-bottom: 2rem;
+        }
+
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .filters select, .filters input {
+            padding: 0.6rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            min-width: 200px;
+            flex: 1;
+        }
+
+        .filters input {
+            flex: 2;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #f8f9ff;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .status-new { background: #e3f2fd; color: #1976d2; }
+        .status-reviewed { background: #fff3e0; color: #f57c00; }
+        .status-interviewing { background: #e8f5e8; color: #388e3c; }
+        .status-rejected { background: #ffebee; color: #d32f2f; }
+        .status-hired { background: #e8eaf6; color: #3f51b5; }
+
+        .cv-link {
+            color: #28a745;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .cv-link:hover {
+            text-decoration: underline;
+        }
+
+        .action-links {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.3rem 0.5rem;
+            border-radius: 3px;
+            transition: background 0.3s;
+        }
+
+        .action-links a:hover {
+            background: #f0f3ff;
+        }
+
+        .consent-yes {
+            color: #28a745;
+        }
+
+        .consent-no {
+            color: #dc3545;
+        }
+
+        .pagination {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .pagination a, .pagination span {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #667eea;
+            transition: all 0.3s;
+        }
+
+        .pagination a:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .pagination .current {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filters select, .filters input {
+                width: 100%;
+            }
+
+            .nav-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>Job Applications ({{ applications|length }} total)</h1>
-  <p><strong>Warning:</strong> This page should be protected with authentication in production.</p>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="nav-brand">
+                <i class="fas fa-brain"></i>
+                <span>NexusAI Admin</span>
+            </div>
+            <div class="nav-links">
+                <a href="{{ url_for('home') }}" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> View Site
+                </a>
+                <a href="{{ url_for('admin_logout') }}">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
 
-  <table>
-    <tr>
-      <th>ID</th>
-      <th>Position</th>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Phone</th>
-      <th>Location</th>
-      <th>Exp (yrs)</th>
-      <th>CV</th>
-      <th>Consent</th>
-      <th>Submitted</th>
-    </tr>
-    {% for row in applications %}
-    <tr>
-      <td>{{ row[0] }}</td>
-      <td>{{ row[1] }}</td>
-      <td>{{ row[2] }}</td>
-      <td><a href="mailto:{{ row[3] }}">{{ row[3] }}</a></td>
-      <td>{{ row[4] }}</td>
-      <td>{{ row[5] }}</td>
-      <td>{{ row[6] }}</td>
-      <td class="{% if row[8] %}cv-yes{% endif %}">
-        {% if row[8] %}Yes ({{ row[8] }}){% else %}—{% endif %}
-      </td>
-      <td>{% if row[9] == 1 %}Yes{% else %}<span class="warning">No</span>{% endif %}</td>
-      <td>{{ row[10] }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Job Applications</h1>
+                <p style="color: #666;">Total: {{ applications|length }} applications</p>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('export_applications') }}" class="btn btn-success">
+                    <i class="fas fa-download"></i> Export CSV
+                </a>
+                <a href="{{ url_for('admin_logout') }}" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
 
-  <p style="margin-top:2rem;">
-    <a href="/">← Back to Home</a> | 
-    <a href="/careers">View Careers Page</a>
-  </p>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-{{ category }}">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% set stats = {
+            'new': applications|selectattr('status', 'equalto', 'new')|list|length,
+            'reviewed': applications|selectattr('status', 'equalto', 'reviewed')|list|length,
+            'interviewing': applications|selectattr('status', 'equalto', 'interviewing')|list|length,
+            'hired': applications|selectattr('status', 'equalto', 'hired')|list|length,
+            'rejected': applications|selectattr('status', 'equalto', 'rejected')|list|length
+        } %}
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ applications|length }}</div>
+                <div class="stat-label">Total Applications</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.new }}</div>
+                <div class="stat-label">New</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.interviewing }}</div>
+                <div class="stat-label">Interviewing</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.hired }}</div>
+                <div class="stat-label">Hired</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.rejected }}</div>
+                <div class="stat-label">Rejected</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <input type="text" id="search" placeholder="Search by name, email, or position..." onkeyup="filterTable()">
+            <select id="statusFilter" onchange="filterTable()">
+                <option value="">All Statuses</option>
+                <option value="new">New</option>
+                <option value="reviewed">Reviewed</option>
+                <option value="interviewing">Interviewing</option>
+                <option value="rejected">Rejected</option>
+                <option value="hired">Hired</option>
+            </select>
+        </div>
+
+        <div class="table-container">
+            <table id="applicationsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Status</th>
+                        <th>Position</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Location</th>
+                        <th>Experience</th>
+                        <th>CV</th>
+                        <th>Consent</th>
+                        <th>Submitted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in applications %}
+                    <tr>
+                        <td>#{{ row['id'] }}</td>
+                        <td>
+                            <span class="status-badge status-{{ row['status'] or 'new' }}">
+                                {{ row['status'] or 'new' }}
+                            </span>
+                        </td>
+                        <td>{{ row['position'] }}</td>
+                        <td><strong>{{ row['full_name'] }}</strong></td>
+                        <td><a href="mailto:{{ row['email'] }}">{{ row['email'] }}</a></td>
+                        <td><a href="tel:{{ row['phone'] }}">{{ row['phone'] }}</a></td>
+                        <td>{{ row['location'] }}</td>
+                        <td>{{ row['experience_years'] }} yrs</td>
+                        <td>
+                            {% if row['cv_filename'] %}
+                                <a href="{{ url_for('download_cv', filename=row['cv_filename']) }}" class="cv-link" title="Download CV">
+                                    <i class="fas fa-file-pdf"></i> Download
+                                </a>
+                            {% else %}
+                                <span style="color: #999;">No CV</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if row['consent_given'] == 1 %}
+                                <span class="consent-yes"><i class="fas fa-check-circle"></i> Yes</span>
+                            {% else %}
+                                <span class="consent-no"><i class="fas fa-times-circle"></i> No</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ row['submitted_at'][:10] }}</td>
+                        <td class="action-links">
+                            <a href="{{ url_for('view_application', app_id=row['id']) }}" title="View Details">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="12" class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h3>No Applications Found</h3>
+                            <p>Applications will appear here once submitted.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function filterTable() {
+            const searchInput = document.getElementById('search').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+            const table = document.getElementById('applicationsTable');
+            const tbody = table.getElementsByTagName('tbody')[0];
+            const rows = tbody.getElementsByTagName('tr');
+
+            for (let row of rows) {
+                if (row.classList.contains('empty-state')) continue;
+                
+                const cells = row.getElementsByTagName('td');
+                if (cells.length < 2) continue;
+                
+                const name = cells[3]?.textContent.toLowerCase() || '';
+                const email = cells[4]?.textContent.toLowerCase() || '';
+                const position = cells[2]?.textContent.toLowerCase() || '';
+                const status = cells[1]?.textContent.toLowerCase().trim() || '';
+
+                const matchesSearch = searchInput === '' || 
+                    name.includes(searchInput) || 
+                    email.includes(searchInput) || 
+                    position.includes(searchInput);
+                    
+                const matchesStatus = statusFilter === '' || status.includes(statusFilter);
+
+                row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+            }
+        }
+
+        // Real-time search
+        document.getElementById('search').addEventListener('keyup', filterTable);
+        
+        // Auto-refresh every 60 seconds (optional)
+        // setTimeout(() => location.reload(), 60000);
+    </script>
 </body>
 </html>
