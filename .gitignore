@@ -1,3 +1,4 @@
 /.env
 /nexusai_jobs.db
 app.log
+uploads/
